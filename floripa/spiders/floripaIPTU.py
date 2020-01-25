@@ -20,7 +20,7 @@ class FloripaiptuSpider(scrapy.Spider):
 
     def parse(self, response):
         workbook = xlrd.open_workbook(
-            '/home/henrique/Planilhas/floripa3.xls')
+            '/home/henrique/Planilhas/floripa.xls')
         worksheet = workbook.sheet_by_index(0)
 
         for row_num in xrange(worksheet.nrows):

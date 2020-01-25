@@ -1,4 +1,4 @@
 .idea/
 .scrapy/
 logs/
-floripa/__pycache__/
+*/__pycache__/
