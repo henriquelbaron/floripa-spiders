@@ -14,7 +14,7 @@ BOT_NAME = 'floripa'
 SPIDER_MODULES = ['floripa.spiders']
 NEWSPIDER_MODULE = 'floripa.spiders'
 
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 SPLASH_URL = 'http://0.0.0.0:8050'
 DOWNLOADER_MIDDLEWARES = {
@@ -28,8 +28,12 @@ SPIDER_MIDDLEWARES = {
 DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
 
 ITEM_PIPELINES = {
-    'floripa.pipelines.FloripaPipeline': 300,
+    'scrapy.pipelines.files.FilesPipeline': 1
+    # 'floripa.pipelines.FloripaPipeline': 300,
 }
+DOWNLOAD_TIMEOUT = 1200
+FILE_STORE = '/home/files'
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'
 
@@ -41,9 +45,9 @@ USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Ge
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 0.50
 # The download delay setting will honor only one of:
-#CONCURRENT_REQUESTS_PER_DOMAIN = 16
+# CONCURRENT_REQUESTS_PER_DOMAIN = 30
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
@@ -54,8 +58,8 @@ USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Ge
 
 # Override the default request headers:
 DEFAULT_REQUEST_HEADERS = {
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'Accept-Language': 'pt-br',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+    'Accept-Language': 'pt-BR',
 }
 
 # Enable or disable spider middlewares
@@ -94,8 +98,8 @@ DEFAULT_REQUEST_HEADERS = {
 
 # Enable and configure HTTP caching (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
-#HTTPCACHE_ENABLED = True
-#HTTPCACHE_EXPIRATION_SECS = 0
-#HTTPCACHE_DIR = 'httpcache'
-#HTTPCACHE_IGNORE_HTTP_CODES = []
+HTTPCACHE_ENABLED = True
+HTTPCACHE_EXPIRATION_SECS = 172800
+# HTTPCACHE_DIR = 'httpcache'
+# HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
