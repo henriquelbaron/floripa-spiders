@@ -1,4 +1,4 @@
 .idea/
 .scrapy/
 logs/
-*/__pycache__/
+**/__pycache__/

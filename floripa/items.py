@@ -16,7 +16,6 @@ class FloripaItemLoader(ItemLoader):
 
 class FloripaItem(scrapy.Item):
     file_urls = scrapy.Field()
-    files = scrapy.Field()
     grupo = scrapy.Field()
     codImovel = scrapy.Field()
     inscricao = scrapy.Field()

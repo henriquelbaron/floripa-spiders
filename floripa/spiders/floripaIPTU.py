@@ -5,18 +5,19 @@ from xlrd.timemachine import xrange
 import time
 import uuid
 import os
-import re
-from scrapy_splash import SplashFormRequest
+from floripa.spiders.utils import Utils
 from imagetyperzapi3.imagetyperzapi import ImageTyperzAPI
-from scrapy.loader import ItemLoader
 from floripa.items import FloripaItem, FloripaItemLoader
 
 
 class FloripaiptuSpider(scrapy.Spider):
-    file_name = '/home/files/FLORIPA_IPTU/' + str(uuid.uuid1()) + '/'
+    file_name = '/home/files/FLORIPA_IPTU/' + Utils.get_today('%d_%m_%y') + '/' + str(uuid.uuid1()) + '/'
     os.makedirs(file_name)
     name = 'floripaIPTU'
-    start_urls = ['http://iptu2019.pmf.sc.gov.br/iptu-virtual/main-iptu///']
+    start_urls = ['http://iptu2019.pmf.sc.gov.br/iptu-virtual/main-iptu/']
+
+    def start_requests(self):
+
 
     def parse(self, response):
         workbook = xlrd.open_workbook(
@@ -30,7 +31,7 @@ class FloripaiptuSpider(scrapy.Spider):
             codImovel = str(row[0])
             inscricao = str(row[1])
             grupo = str(row[2])
-            data_atual = time.strftime('%d/%m/%y', time.localtime())
+            data_atual = Utils.get_today('%d/%m/%y')
             url_modifica = 'http://iptu2019.pmf.sc.gov.br/iptu-virtual/main-iptu/segunda_via.dados.php?tp_entrada=xinscricao_internet&data=' + \
                            data_atual + '&opcao=confere_entradas&cd_refr=' + inscricao + '&cd_refr_ano=2020'
             yield scrapy.FormRequest(
@@ -40,7 +41,7 @@ class FloripaiptuSpider(scrapy.Spider):
 
     def parse_login(self, response, codImovel, inscricao, grupo):
         status = response.xpath('//p[@class="atencao"]/text()').extract_first()
-        if status == None:
+        if status is None:
             status = 'Com Débito'
             formdata = {'nu_insc_imbl': inscricao,
                         'ano-segunda-via-select': '2020',
@@ -52,7 +53,7 @@ class FloripaiptuSpider(scrapy.Spider):
                            'inscricao': inscricao, 'grupo': grupo}
             )
         else:
-            status = self.cleanhtml(status)
+            status = Utils.cleanhtml(status)
             loader = FloripaItemLoader(FloripaItem(), response)
             loader.add_value('grupo', grupo)
             loader.add_value('codImovel', codImovel)
@@ -65,8 +66,7 @@ class FloripaiptuSpider(scrapy.Spider):
         nDams = []
         for fatura in faturas:
             numeroDam = fatura.xpath('./td[2]/text()').extract_first()
-            numeroDam = numeroDam.replace('-', '')
-            nDams.append(numeroDam)
+            nDams.append(numeroDam.replace('-', ''))
             loader = FloripaItemLoader(FloripaItem(), fatura)
             loader.add_value('grupo', grupo)
             loader.add_value('codImovel', codImovel)
@@ -93,48 +93,27 @@ class FloripaiptuSpider(scrapy.Spider):
         captcha_id = ita.submit_recaptcha(recaptcha_params)
         while ita.in_progress():
             time.sleep(5)
-
-        recaptcha_response = ita.retrieve_recaptcha(captcha_id)
-
+        response = ita.retrieve_recaptcha(captcha_id)
         formdata = {
             'data': '',
             'controle': 'ADMIN',
-            'g-recaptcha-response': recaptcha_response,
+            'g-recaptcha-response': response,
             'nu_dam[]': []
         }
         for numero in nDams:
             formdata['nu_dam[]'].append(numero)
-
-        self.log(formdata)
-
-        self.logger.info(formdata)
+        path = self.file_name + codImovel.replace('.', '') + '_' + inscricao
+        path += '.pdf'
         yield scrapy.FormRequest(method='POST', dont_filter=True, formdata=formdata, callback=self.download,
                                  url='http://iptu2019.pmf.sc.gov.br/iptu-virtual/main-iptu/segunda_via_internet.pdf.php',
-                                 cb_kwargs={'codImovel': codImovel, 'inscricao': inscricao})
-
-    def download(self, response, codImovel, inscricao):
-        codImovel = codImovel.replace('.', '')
-        path = self.file_name + codImovel + '_' + inscricao
-        path += '.pdf'
-        with open(path, 'wb') as f:
-            f.write(response.body)
-
+                                 cb_kwargs={'path': path})
         loader = FloripaItemLoader(FloripaItem(), response)
         loader.add_value('codImovel', codImovel)
         loader.add_value('inscricao', inscricao)
-        # loader.add_value('files', response.body)
         loader.add_value('file_urls', path)
         yield loader.load_item()
-        # path = response.url.split('/')[-1]
-        # # path = self.file_name + path
-        # path = path.replace('.php', '')
-        # self.logger.info('Saving PDF %s', path)
-        # self.log('##########################')
-        # self.log(response.body)
-        # self.log(response)
-        # self.log('##########################')
 
-    def cleanhtml(self, raw_html):
-        cleanr = re.compile('<.*?>')
-        cleantext = re.sub(cleanr, '', raw_html)
-        return cleantext
+    def download(self, response, path):
+        self.logger.info('Salvando PDF em ' + path)
+        with open(path, 'wb') as f:
+            f.write(response.body)
