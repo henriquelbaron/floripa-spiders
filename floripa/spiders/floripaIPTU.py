@@ -14,14 +14,14 @@ class FloripaiptuSpider(scrapy.Spider):
     file_name = '/home/files/FLORIPA_IPTU/' + Utils.get_today('%d_%m_%y') + '/' + str(uuid.uuid1()) + '/'
     os.makedirs(file_name)
     name = 'floripaIPTU'
-    start_urls = ['http://iptu2019.pmf.sc.gov.br/iptu-virtual/main-iptu/']
+
+    def __init__(self, codImovel = None, inscricao= None):
+        self.codImovel = codImovel
+        self.inscricao = inscricao
 
     def start_requests(self):
-
-
-    def parse(self, response):
         workbook = xlrd.open_workbook(
-            '/home/henrique/Planilhas/floripa.xls')
+            '/home/henrique/Planilhas/floripa3.xls')
         worksheet = workbook.sheet_by_index(0)
 
         for row_num in xrange(worksheet.nrows):
@@ -36,39 +36,37 @@ class FloripaiptuSpider(scrapy.Spider):
                            data_atual + '&opcao=confere_entradas&cd_refr=' + inscricao + '&cd_refr_ano=2020'
             yield scrapy.FormRequest(
                 url=url_modifica,
-                method='GET', callback=self.parse_login, dont_filter=True,
-                cb_kwargs={'codImovel': codImovel, 'inscricao': inscricao, 'grupo': grupo})
+                method='GET', callback=self.parse_login,
+                cb_kwargs={'codImovel': codImovel, 'inscricao': inscricao})
 
-    def parse_login(self, response, codImovel, inscricao, grupo):
+    def parse_login(self, response, codImovel, inscricao):
         status = response.xpath('//p[@class="atencao"]/text()').extract_first()
         if status is None:
-            status = 'Com Débito'
+            self.logger.info('Com Débito')
             formdata = {'nu_insc_imbl': inscricao,
                         'ano-segunda-via-select': '2020',
                         'tipo-pagamento-radio': 'parcelado'}
             yield scrapy.FormRequest(
                 url='http://iptu2019.pmf.sc.gov.br/iptu-virtual/main-iptu/index-segunda-via.php',
-                method='POST', callback=self.com_debito, formdata=formdata, dont_filter=True,
+                method='POST', callback=self.com_debito, formdata=formdata,
                 cb_kwargs={'codImovel': codImovel,
-                           'inscricao': inscricao, 'grupo': grupo}
+                           'inscricao': inscricao}
             )
         else:
             status = Utils.cleanhtml(status)
             loader = FloripaItemLoader(FloripaItem(), response)
-            loader.add_value('grupo', grupo)
             loader.add_value('codImovel', codImovel)
             loader.add_value('inscricao', inscricao)
             loader.add_value('status', status)
             yield loader.load_item()
 
-    def com_debito(self, response, codImovel, inscricao, grupo):
+    def com_debito(self, response, codImovel, inscricao):
         faturas = response.xpath('//table[@id="demo-foo-addrow"]/tbody/tr')
         nDams = []
         for fatura in faturas:
             numeroDam = fatura.xpath('./td[2]/text()').extract_first()
             nDams.append(numeroDam.replace('-', ''))
             loader = FloripaItemLoader(FloripaItem(), fatura)
-            loader.add_value('grupo', grupo)
             loader.add_value('codImovel', codImovel)
             loader.add_value('inscricao', inscricao)
             loader.add_value('status', 'Com Débito')
@@ -102,18 +100,20 @@ class FloripaiptuSpider(scrapy.Spider):
         }
         for numero in nDams:
             formdata['nu_dam[]'].append(numero)
+
+        yield scrapy.FormRequest(method='POST', formdata=formdata, callback=self.download,
+                                 url='http://iptu2019.pmf.sc.gov.br/iptu-virtual/main-iptu/segunda_via_internet.pdf.php',
+                                 cb_kwargs={'codImovel': codImovel,'inscricao':inscricao})
+
+    def download(self, response,codImovel,inscricao):
         path = self.file_name + codImovel.replace('.', '') + '_' + inscricao
         path += '.pdf'
-        yield scrapy.FormRequest(method='POST', dont_filter=True, formdata=formdata, callback=self.download,
-                                 url='http://iptu2019.pmf.sc.gov.br/iptu-virtual/main-iptu/segunda_via_internet.pdf.php',
-                                 cb_kwargs={'path': path})
+        self.logger.info('Salvando PDF em ' + path)
+        with open(path, 'wb') as f:
+            f.write(response.body)
         loader = FloripaItemLoader(FloripaItem(), response)
         loader.add_value('codImovel', codImovel)
         loader.add_value('inscricao', inscricao)
         loader.add_value('file_urls', path)
         yield loader.load_item()
 
-    def download(self, response, path):
-        self.logger.info('Salvando PDF em ' + path)
-        with open(path, 'wb') as f:
-            f.write(response.body)
