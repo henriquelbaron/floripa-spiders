@@ -7,14 +7,11 @@
 
 import scrapy
 from scrapy.loader.processors import TakeFirst
-from scrapy.loader import ItemLoader
 
-
-class FloripaItemLoader(ItemLoader):
-    default_output_processor = TakeFirst()
 
 
 class FloripaItem(scrapy.Item):
+    default_output_processor = TakeFirst()
     file_urls = scrapy.Field()
     grupo = scrapy.Field()
     codImovel = scrapy.Field()
@@ -26,3 +23,25 @@ class FloripaItem(scrapy.Item):
     vencimento = scrapy.Field()
     valor = scrapy.Field()
     codBarra = scrapy.Field()
+
+class FloripaVO(scrapy.Item):
+    codImovel = scrapy.Field(
+        output_processor=TakeFirst()
+    )
+    inscricao = scrapy.Field(
+        output_processor=TakeFirst()
+    )
+    status = scrapy.Field(
+        output_processor=TakeFirst()
+    )
+    nome = scrapy.Field(
+        output_processor=TakeFirst()
+    )
+    cpfCnpj = scrapy.Field(
+        output_processor=TakeFirst()
+    )
+    endereco = scrapy.Field(
+        output_processor=TakeFirst()
+    )
+    faturas = scrapy.Field()
+    pdfs = scrapy.Field()

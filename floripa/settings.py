@@ -17,19 +17,19 @@ NEWSPIDER_MODULE = 'floripa.spiders'
 ROBOTSTXT_OBEY = False
 
 SPLASH_URL = 'http://0.0.0.0:8050'
-DOWNLOADER_MIDDLEWARES = {
-    'scrapy_splash.SplashCookiesMiddleware': 723,
-    'scrapy_splash.SplashMiddleware': 725,
-    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
-}
-SPIDER_MIDDLEWARES = {
-    'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
-}
-DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
+# DOWNLOADER_MIDDLEWARES = {
+#     'scrapy_splash.SplashCookiesMiddleware': 723,
+#     'scrapy_splash.SplashMiddleware': 725,
+#     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
+# }
+# SPIDER_MIDDLEWARES = {
+#     'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
+# }
+# DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
 
 ITEM_PIPELINES = {
-    'scrapy.pipelines.files.FilesPipeline': 1
-    # 'floripa.pipelines.FloripaPipeline': 300,
+    # 'scrapy.pipelines.files.FilesPipeline': 1
+    'floripa.pipelines.FloripaPipeline': 300,
 }
 DOWNLOAD_TIMEOUT = 1200
 FILE_STORE = '/home/files'
@@ -40,12 +40,12 @@ USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Ge
 # Obey robots.txt rules
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 9999
+# CONCURRENT_REQUESTS = 9999
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 0.50
+# DOWNLOAD_DELAY = 0.50
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 30
 #CONCURRENT_REQUESTS_PER_IP = 16
