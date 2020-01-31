@@ -31,9 +31,12 @@ ITEM_PIPELINES = {
     # 'scrapy.pipelines.files.FilesPipeline': 1
     'floripa.pipelines.FloripaPipeline': 300,
 }
+LOG_LEVEL = 'INFO'
 DOWNLOAD_TIMEOUT = 1200
 FILE_STORE = '/home/files'
-
+CONCURRENT_REQUESTS = 1
+CONCURRENT_REQUESTS_PER_DOMAIN = 1
+CONCURRENT_REQUESTS_PER_IP = 1
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'
 
@@ -47,7 +50,7 @@ USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Ge
 # See also autothrottle settings and docs
 # DOWNLOAD_DELAY = 0.50
 # The download delay setting will honor only one of:
-# CONCURRENT_REQUESTS_PER_DOMAIN = 30
+CONCURRENT_REQUESTS_PER_DOMAIN = 1
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
