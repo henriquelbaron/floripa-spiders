@@ -4,10 +4,10 @@ import time
 import uuid
 import json
 import scrapy
-import xlrd
+# import xlrd
 import re
-from dbc_api_python3.deathbycaptcha import SocketClient
-from xlrd.timemachine import xrange
+# from dbc_api_python3.deathbycaptcha import SocketClient
+# from xlrd.timemachine import xrange
 from imagetyperzapi3.imagetyperzapi import ImageTyperzAPI
 from scrapy.loader import ItemLoader
 import slate3k as slate
@@ -27,17 +27,17 @@ class FloripaiptuSpider(scrapy.Spider):
         self.imoveis = imoveis
 
     def start_requests(self):
-        workbook = xlrd.open_workbook(
-            '/home/henrique/Planilhas/floripa.xls')
-        worksheet = workbook.sheet_by_index(0)
-        imoveis = []
-        for row_num in xrange(worksheet.nrows):
-            if row_num == 0:
-                continue
-            row = worksheet.row_values(row_num)
-            imoveis.append(dict(codImovel=str(row[0]), inscricao=str(row[1])))
-            
-        self.imoveis = imoveis
+        # workbook = xlrd.open_workbook(
+        #     '/home/henrique/Planilhas/floripa.xls')
+        # worksheet = workbook.sheet_by_index(0)
+        # imoveis = []
+        # for row_num in xrange(worksheet.nrows):
+        #     if row_num == 0:
+        #         continue
+        #     row = worksheet.row_values(row_num)
+        #     imoveis.append(dict(codImovel=str(row[0]), inscricao=str(row[1])))
+        
+        # self.imoveis = imoveis
         self.logger.info(self.imoveis)
         for imovel in self.imoveis:
             data_atual = Utils.get_today('%d/%m/%y')
