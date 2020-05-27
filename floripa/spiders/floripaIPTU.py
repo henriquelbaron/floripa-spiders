@@ -21,7 +21,7 @@ class FloripaiptuSpider(scrapy.Spider):
     file_name = '/home/files/FLORIPA_IPTU/' + \
         Utils.get_today('%d_%m_%y') + '/' + str(uuid.uuid1()) + '/'
     name = 'floripaIPTU'
-    ita = ImageTyperzAPI('2447DFA2F60747DABF7152A14142511F')
+    ita = ImageTyperzAPI('')
 
     def __init__(self, imoveis=None):
         self.imoveis = imoveis
